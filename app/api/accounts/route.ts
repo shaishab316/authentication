@@ -43,10 +43,12 @@ export async function GET(req: Request) {
 	try {
 		const accounts = await Account.find({ userId: authResult.userId });
 		// Decrypt secrets before sending to client
-		const decryptedAccounts = accounts.map((account) => ({
-			...account.toObject(),
-			secret: decrypt(account.secret),
-		}));
+		const decryptedAccounts = accounts
+			.map((account) => ({
+				...account.toObject(),
+				secret: decrypt(account.secret),
+			}))
+			.filter((account) => account.secret !== '');
 		return NextResponse.json(decryptedAccounts, { status: 200 });
 	} catch (error) {
 		console.error('Error fetching accounts:', error);

@@ -30,6 +30,8 @@ import {
 	X,
 	Tag,
 	UserIcon,
+	KeyRound,
+	LogOut,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -71,6 +73,22 @@ export default function AuthenticatorApp() {
 	const [authError, setAuthError] = useState('');
 	const [userToken, setUserToken] = useState<string | null>(null);
 	const [currentUsername, setCurrentUsername] = useState<string | null>(null);
+
+	// Forgot Password State
+	const [isForgotPasswordDialogOpen, setIsForgotPasswordDialogOpen] =
+		useState(false);
+	const [forgotPasswordUsername, setForgotPasswordUsername] = useState('');
+	const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
+	const [forgotPasswordError, setForgotPasswordError] = useState('');
+
+	// Change Password State
+	const [isChangePasswordDialogOpen, setIsChangePasswordDialogOpen] =
+		useState(false);
+	const [oldPassword, setOldPassword] = useState('');
+	const [newPassword, setNewPassword] = useState('');
+	const [confirmNewPassword, setConfirmNewPassword] = useState('');
+	const [changePasswordLoading, setChangePasswordLoading] = useState(false);
+	const [changePasswordError, setChangePasswordError] = useState('');
 
 	const { toast } = useToast();
 
@@ -501,6 +519,103 @@ export default function AuthenticatorApp() {
 		});
 	};
 
+	const handleForgotPasswordSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		setForgotPasswordLoading(true);
+		setForgotPasswordError('');
+
+		try {
+			const response = await fetch('/api/auth/forgot-password', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ username: forgotPasswordUsername }),
+			});
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				throw new Error(data.message || 'Failed to reset password');
+			}
+
+			toast({
+				title: 'Password Reset Initiated',
+				description: data.message,
+			});
+			setIsForgotPasswordDialogOpen(false);
+			setForgotPasswordUsername('');
+		} catch (error: any) {
+			setForgotPasswordError(error.message);
+			toast({
+				title: 'Error',
+				description: error.message,
+				variant: 'destructive',
+			});
+		} finally {
+			setForgotPasswordLoading(false);
+		}
+	};
+
+	const handleChangePasswordSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		setChangePasswordLoading(true);
+		setChangePasswordError('');
+
+		if (newPassword !== confirmNewPassword) {
+			setChangePasswordError('New passwords do not match');
+			setChangePasswordLoading(false);
+			return;
+		}
+
+		if (newPassword.length < 8) {
+			setChangePasswordError('New password must be at least 8 characters long');
+			setChangePasswordLoading(false);
+			return;
+		}
+
+		try {
+			const response = await fetch('/api/auth/change-password', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${userToken}`,
+				},
+				body: JSON.stringify({ oldPassword, newPassword }),
+			});
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				throw new Error(data.message || 'Failed to change password');
+			}
+
+			toast({
+				title: 'Password Changed',
+				description: data.message,
+			});
+			setIsChangePasswordDialogOpen(false);
+			setOldPassword('');
+			setNewPassword('');
+			setConfirmNewPassword('');
+		} catch (error: any) {
+			setChangePasswordError(error.message);
+			toast({
+				title: 'Error',
+				description: error.message,
+				variant: 'destructive',
+			});
+			if (
+				error.message === 'Invalid token' ||
+				error.message === 'No token provided'
+			) {
+				handleLogout();
+			}
+		} finally {
+			setChangePasswordLoading(false);
+		}
+	};
+
 	const addAccount = async () => {
 		if (!newAccount.name || !newAccount.secret) {
 			toast({
@@ -786,6 +901,76 @@ export default function AuthenticatorApp() {
 							</Button>
 						</form>
 
+						{/* Forgot Password */}
+						<Dialog
+							open={isForgotPasswordDialogOpen}
+							onOpenChange={setIsForgotPasswordDialogOpen}
+						>
+							<DialogTrigger asChild>
+								<Button
+									variant='link'
+									className='mt-4 text-blue-600 hover:text-blue-700'
+								>
+									Forgot Password?
+								</Button>
+							</DialogTrigger>
+							<DialogContent className='rounded-2xl'>
+								<DialogHeader>
+									<DialogTitle>Forgot Password</DialogTitle>
+									<DialogDescription>
+										Enter your username to receive a new password.
+									</DialogDescription>
+								</DialogHeader>
+								<form
+									onSubmit={handleForgotPasswordSubmit}
+									className='space-y-4'
+								>
+									<div>
+										<Label htmlFor='forgot-username'>Username</Label>
+										<Input
+											id='forgot-username'
+											type='text'
+											placeholder='Enter your username'
+											value={forgotPasswordUsername}
+											onChange={(e) =>
+												setForgotPasswordUsername(e.target.value)
+											}
+											required
+											className='rounded-xl'
+										/>
+									</div>
+									{forgotPasswordError && (
+										<p className='text-red-500 text-sm'>
+											{forgotPasswordError}
+										</p>
+									)}
+									<DialogFooter>
+										<Button
+											variant='outline'
+											onClick={() => setIsForgotPasswordDialogOpen(false)}
+											className='rounded-xl'
+										>
+											Cancel
+										</Button>
+										<Button
+											type='submit'
+											disabled={forgotPasswordLoading}
+											className='rounded-xl'
+										>
+											{forgotPasswordLoading ? (
+												<>
+													<div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2' />
+													Sending...
+												</>
+											) : (
+												'Reset Password'
+											)}
+										</Button>
+									</DialogFooter>
+								</form>
+							</DialogContent>
+						</Dialog>
+
 						{/* Biometric Setup/Auth (only if WebAuthn is supported and user is logged in) */}
 						{webAuthnSupported && userToken && (
 							<div className='mt-8 pt-8 border-t border-gray-200 space-y-6'>
@@ -897,12 +1082,107 @@ export default function AuthenticatorApp() {
 								{currentUsername}
 							</Badge>
 						)}
+						{/* Change Password Dialog Trigger */}
+						<Dialog
+							open={isChangePasswordDialogOpen}
+							onOpenChange={setIsChangePasswordDialogOpen}
+						>
+							<DialogTrigger asChild>
+								<Button
+									variant='ghost'
+									className='rounded-full h-10 w-10 p-0'
+									title='Change Password'
+								>
+									<KeyRound className='w-5 h-5 text-gray-600' />
+								</Button>
+							</DialogTrigger>
+							<DialogContent className='rounded-2xl'>
+								<DialogHeader>
+									<DialogTitle>Change Password</DialogTitle>
+									<DialogDescription>
+										Update your account password.
+									</DialogDescription>
+								</DialogHeader>
+								<form
+									onSubmit={handleChangePasswordSubmit}
+									className='space-y-4'
+								>
+									<div>
+										<Label htmlFor='old-password'>Old Password</Label>
+										<Input
+											id='old-password'
+											type='password'
+											placeholder='Enter your old password'
+											value={oldPassword}
+											onChange={(e) => setOldPassword(e.target.value)}
+											required
+											className='rounded-xl'
+										/>
+									</div>
+									<div>
+										<Label htmlFor='new-password'>New Password</Label>
+										<Input
+											id='new-password'
+											type='password'
+											placeholder='Enter new password (min 8 chars)'
+											value={newPassword}
+											onChange={(e) => setNewPassword(e.target.value)}
+											required
+											className='rounded-xl'
+										/>
+									</div>
+									<div>
+										<Label htmlFor='confirm-new-password'>
+											Confirm New Password
+										</Label>
+										<Input
+											id='confirm-new-password'
+											type='password'
+											placeholder='Confirm new password'
+											value={confirmNewPassword}
+											onChange={(e) => setConfirmNewPassword(e.target.value)}
+											required
+											className='rounded-xl'
+										/>
+									</div>
+									{changePasswordError && (
+										<p className='text-red-500 text-sm'>
+											{changePasswordError}
+										</p>
+									)}
+									<DialogFooter>
+										<Button
+											variant='outline'
+											onClick={() => setIsChangePasswordDialogOpen(false)}
+											className='rounded-xl'
+										>
+											Cancel
+										</Button>
+										<Button
+											type='submit'
+											disabled={changePasswordLoading}
+											className='rounded-xl'
+										>
+											{changePasswordLoading ? (
+												<>
+													<div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2' />
+													Changing...
+												</>
+											) : (
+												'Change Password'
+											)}
+										</Button>
+									</DialogFooter>
+								</form>
+							</DialogContent>
+						</Dialog>
 						<Button
 							variant='ghost'
 							onClick={handleLogout}
 							className='rounded-full h-10 w-10 p-0'
+							title='Logout'
 						>
-							<Lock className='w-5 h-5 text-gray-600' />
+							<LogOut className='w-5 h-5 text-gray-600' />
 						</Button>
 					</div>
 				</div>
