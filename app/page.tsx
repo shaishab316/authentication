@@ -1000,21 +1000,10 @@ export default function AuthenticatorApp() {
 						<Shield className='w-8 h-8 text-blue-600' />
 						<h1 className='text-sm md:text-2xl flex flex-col font-bold text-gray-900'>
 							<span>Auth316</span>
-							<span className='text-xs font-medium md:hidden'>
-								{currentUsername}
-							</span>
+							<span className='text-xs font-medium'>{currentUsername}</span>
 						</h1>
 					</div>
 					<div className='flex items-center gap-2'>
-						{currentUsername && (
-							<Badge
-								variant='secondary'
-								className='rounded-full hidden px-3 py-1 text-sm md:flex items-center gap-1'
-							>
-								<UserIcon className='w-3 h-3' />
-								{currentUsername}
-							</Badge>
-						)}
 						{/* Change Password Dialog Trigger */}
 						<Dialog
 							open={isChangePasswordDialogOpen}
