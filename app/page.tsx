@@ -34,6 +34,7 @@ import {
 	LogOut,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { getDisplacementFilter } from '@/components/ui/LiquidGlass';
 
 interface Account {
 	_id: string; // MongoDB's default ID
@@ -735,97 +736,12 @@ export default function AuthenticatorApp() {
 		return code.replace(/(\d{3})(\d{3})/, '$1 $2');
 	};
 
-	const getProgressColor = (timeRemaining: number) => {
-		if (timeRemaining <= 5) return '#ef4444';
-		if (timeRemaining <= 10) return '#f59e0b';
-		return '#3b82f6';
-	};
-
 	const clearSearch = () => {
 		setSearchQuery('');
 	};
 
 	const searchByTag = (tag: string) => {
 		setSearchQuery(`tag:${tag}`);
-	};
-
-	const ProgressCard = ({
-		children,
-		progress,
-		timeRemaining,
-		onClick,
-		className = '',
-	}: {
-		children: React.ReactNode;
-		progress: number;
-		timeRemaining: number;
-		onClick?: () => void;
-		className?: string;
-	}) => {
-		const strokeWidth = 3;
-		const progressColor = getProgressColor(timeRemaining);
-		const circumference = 2 * Math.PI * 50;
-
-		return (
-			<div className='relative'>
-				<svg
-					className='absolute inset-0 w-full h-full'
-					style={{ borderRadius: '16px' }}
-				>
-					<defs>
-						<mask id={`cardMask-${Math.random()}`}>
-							<rect width='100%' height='100%' fill='white' rx='16' ry='16' />
-							<rect
-								x={strokeWidth}
-								y={strokeWidth}
-								width={`calc(100% - ${strokeWidth * 2}px)`}
-								height={`calc(100% - ${strokeWidth * 2}px)`}
-								fill='black'
-								rx='13'
-								ry='13'
-							/>
-						</mask>
-					</defs>
-
-					<rect
-						width='100%'
-						height='100%'
-						fill='none'
-						stroke='#e5e7eb'
-						strokeWidth={strokeWidth}
-						rx='16'
-						ry='16'
-					/>
-
-					<rect
-						width='100%'
-						height='100%'
-						fill='none'
-						stroke={progressColor}
-						strokeWidth={strokeWidth}
-						rx='16'
-						ry='16'
-						strokeDasharray={`${
-							(progress / 100) * circumference
-						} ${circumference}`}
-						strokeLinecap='round'
-						className='transition-all duration-1000 ease-linear'
-						style={{
-							transformOrigin: 'center',
-							transform: 'rotate(-90deg)',
-						}}
-					/>
-				</svg>
-
-				<div
-					className={`relative bg-white rounded-2xl cursor-pointer hover:bg-gray-50 transition-colors ${className}`}
-					onClick={onClick}
-					style={{ margin: `${strokeWidth}px` }}
-				>
-					{children}
-				</div>
-			</div>
-		);
 	};
 
 	// Authentication Screen
@@ -1067,16 +983,33 @@ export default function AuthenticatorApp() {
 		<div className='min-h-screen bg-gray-50 p-4'>
 			<div className='max-w-md mx-auto'>
 				{/* Header */}
-				<div className='flex items-center justify-between mb-6'>
+				<div
+					className='flex items-center justify-between mb-6 sticky top-4 z-[999] px-4 py-2 rounded-md border border-gray-200'
+					style={{
+						backdropFilter: `blur(2px) url('${getDisplacementFilter({
+							height: 50,
+							width: 500,
+							radius: 4,
+							depth: 5,
+							strength: 100,
+							chromaticAberration: 0,
+						})}') blur(4px)`,
+					}}
+				>
 					<div className='flex items-center gap-3'>
 						<Shield className='w-8 h-8 text-blue-600' />
-						<h1 className='text-2xl font-bold text-gray-900'>Authenticator</h1>
+						<h1 className='text-sm md:text-2xl flex flex-col font-bold text-gray-900'>
+							<span>Auth316</span>
+							<span className='text-xs font-medium md:hidden'>
+								{currentUsername}
+							</span>
+						</h1>
 					</div>
 					<div className='flex items-center gap-2'>
 						{currentUsername && (
 							<Badge
 								variant='secondary'
-								className='rounded-full px-3 py-1 text-sm flex items-center gap-1'
+								className='rounded-full hidden px-3 py-1 text-sm md:flex items-center gap-1'
 							>
 								<UserIcon className='w-3 h-3' />
 								{currentUsername}
@@ -1284,71 +1217,62 @@ export default function AuthenticatorApp() {
 							const codeData = codes[account._id];
 
 							return (
-								<ProgressCard
-									key={account._id}
-									progress={codeData?.progress || 0}
-									timeRemaining={codeData?.timeRemaining || 0}
-									onClick={() =>
-										copyCode(codeData?.current || '------', account.name)
-									}
-								>
-									<CardContent className='p-4'>
-										<div className='flex items-center justify-between'>
-											<div className='flex-1'>
-												<div className='flex items-center gap-3 mb-2'>
-													<div className='w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center'>
-														<span className='text-blue-600 font-semibold text-sm'>
-															{account.issuer.charAt(0).toUpperCase()}
-														</span>
-													</div>
-													<div className='flex-1'>
-														<h3 className='font-medium text-gray-900'>
-															{account.issuer}
-														</h3>
-														<p className='text-sm text-gray-500'>
-															{account.name}
-														</p>
-													</div>
+								<CardContent className='p-4 border rounded-2xl'>
+									<div className='flex items-center justify-between'>
+										<div className='flex-1'>
+											<div className='flex items-center gap-3 mb-2'>
+												<div className='w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center'>
+													<span className='text-blue-600 font-semibold text-sm'>
+														{account.issuer.charAt(0).toUpperCase()}
+													</span>
 												</div>
-												<div className='font-mono text-2xl font-bold text-gray-900 tracking-wider ml-11 mb-2'>
-													{formatCode(codeData?.current || '------')}
+												<div className='flex-1'>
+													<h3 className='font-medium text-gray-900'>
+														{account.issuer}
+													</h3>
+													<p className='text-sm text-gray-500'>
+														{account.name}
+													</p>
 												</div>
-												{account.tags.length > 0 && (
-													<div className='flex flex-wrap gap-1 ml-11'>
-														{account.tags.map((tag) => (
-															<Badge
-																key={tag}
-																variant='outline'
-																className='text-xs cursor-pointer hover:bg-blue-50 hover:border-blue-200 rounded-full'
-																onClick={(e) => {
-																	e.stopPropagation();
-																	searchByTag(tag);
-																}}
-															>
-																{tag}
-															</Badge>
-														))}
-													</div>
-												)}
 											</div>
-											<div className='flex items-center gap-3'>
-												<div className='text-center'>
-													<div className='text-xs text-gray-500 font-medium'>
-														{codeData?.timeRemaining || 0}s
-													</div>
-												</div>
-												<Button
-													variant='ghost'
-													size='sm'
-													onClick={(e) => removeAccount(e, account._id)}
-													className='text-gray-400 hover:text-red-500 rounded-full h-8 w-8 p-0'
-												>
-													<Trash2 className='w-4 h-4' />
-												</Button>
+											<div className='font-mono text-2xl font-bold text-gray-900 tracking-wider ml-11 mb-2'>
+												{formatCode(codeData?.current || '------')}
 											</div>
+											{account.tags.length > 0 && (
+												<div className='flex flex-wrap gap-1 ml-11'>
+													{account.tags.map((tag) => (
+														<Badge
+															key={tag}
+															variant='outline'
+															className='text-xs cursor-pointer hover:bg-blue-50 hover:border-blue-200 rounded-full'
+															onClick={(e) => {
+																e.stopPropagation();
+																searchByTag(tag);
+															}}
+														>
+															{tag}
+														</Badge>
+													))}
+												</div>
+											)}
 										</div>
-									</CardContent>
-								</ProgressCard>
+										<div className='flex items-center gap-3'>
+											<div className='text-center'>
+												<div className='text-xs text-gray-500 font-medium'>
+													{codeData?.timeRemaining || 0}s
+												</div>
+											</div>
+											<Button
+												variant='ghost'
+												size='sm'
+												onClick={(e) => removeAccount(e, account._id)}
+												className='text-gray-400 hover:text-red-500 rounded-full h-8 w-8 p-0'
+											>
+												<Trash2 className='w-4 h-4' />
+											</Button>
+										</div>
+									</div>
+								</CardContent>
 							);
 						})
 					)}
@@ -1357,7 +1281,19 @@ export default function AuthenticatorApp() {
 				{/* Add Account Button */}
 				<Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
 					<DialogTrigger asChild>
-						<Button className='w-full rounded-2xl h-12 text-base font-medium'>
+						<Button
+							className='w-full h-12 text-base font-medium sticky bottom-4 px-4 py-2 rounded-2xl border border-gray-200 bg-transparent text-black hover:bg-white/50'
+							style={{
+								backdropFilter: `blur(2px) url('${getDisplacementFilter({
+									height: 50,
+									width: 500,
+									radius: 15,
+									depth: 5,
+									strength: 100,
+									chromaticAberration: 0,
+								})}') blur(4px)`,
+							}}
+						>
 							<Plus className='w-5 h-5 mr-2' />
 							Add Account
 						</Button>
