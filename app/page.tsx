@@ -1206,7 +1206,10 @@ export default function AuthenticatorApp() {
 							const codeData = codes[account._id];
 
 							return (
-								<CardContent className='p-4 border rounded-2xl'>
+								<CardContent
+									onClick={() => copyCode(codeData?.current, account.name)}
+									className='p-4 border rounded-2xl hover:bg-gray-100 cursor-pointer active:bg-gray-200'
+								>
 									<div className='flex items-center justify-between'>
 										<div className='flex-1'>
 											<div className='flex items-center gap-3 mb-2'>
@@ -1254,7 +1257,12 @@ export default function AuthenticatorApp() {
 											<Button
 												variant='ghost'
 												size='sm'
-												onClick={(e) => removeAccount(e, account._id)}
+												onClick={(e) => {
+													e.stopPropagation();
+													e.preventDefault();
+													window.confirm('Delete?') &&
+														removeAccount(e, account._id);
+												}}
 												className='text-gray-400 hover:text-red-500 rounded-full h-8 w-8 p-0'
 											>
 												<Trash2 className='w-4 h-4' />
