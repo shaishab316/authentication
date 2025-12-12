@@ -4,11 +4,14 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "dev": "dotenvx run -- next dev",
+    "start": "dotenvx run -- next start",
+    "env-encrypt": "npx dotenvx encrypt -f .env",
+    "env-decrypt": "npx dotenvx decrypt -f .env"
   },
   "dependencies": {
+    "@dotenvx/dotenvx": "^1.51.2",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
