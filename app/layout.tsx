@@ -5,10 +5,10 @@ import 'react-toastify/dist/ReactToastify.css';
 import ToastProvider from '@/components/toast-provider';
 
 export const metadata: Metadata = {
-	title: 'Auth316 | 2FA Authenticator',
-	description: 'Auth316 2FA Authenticator App',
+	title: '2FA Authenticator',
+	description: '2FA Authenticator App',
 	generator: 'shaishab316',
-	keywords: ['auth316', '2fa', 'authenticator', 'shaishab316'],
+	keywords: ['2fa', 'authenticator', 'shaishab316'],
 	icons: {
 		icon: '/favicon.svg',
 	},

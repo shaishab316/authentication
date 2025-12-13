@@ -27,13 +27,13 @@ export const sendMail = async ({
 	try {
 		//? Send email
 		const { accepted } = await transporter.sendMail({
-			from: `"Auth316" <${user}>`,
+			from: `"2FA Authenticator" <${user}>`,
 			to,
 			subject,
 			html,
 		});
 
-		return accepted > 0;
+		return accepted.length > 0;
 	} catch {
 		return false;
 	}

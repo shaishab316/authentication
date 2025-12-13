@@ -32,7 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
 					</div>
 					<div className='flex flex-col'>
 						<h1 className='text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>
-							Auth316
+							2FA Authenticator
 						</h1>
 						<span className='text-xs sm:text-sm font-medium text-gray-600'>
 							{currentUsername

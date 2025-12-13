@@ -48,7 +48,7 @@ export async function POST(req: Request) {
 		try {
 			await sendMail({
 				to: user.username,
-				subject: 'Your auth316 password has been reset',
+				subject: 'Your 2FA Authenticator password has been reset',
 				html: `<p>Your new password is: <strong>${newPassword}</strong></p>`,
 			});
 		} catch (error) {
