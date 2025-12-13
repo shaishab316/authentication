@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Shield } from 'lucide-react';
-import { toast } from 'react-toastify';
 import { authService } from '@/services/authService';
 import { ForgotPasswordDialog } from '@/components/auth/ForgotPasswordDialog';
 
@@ -55,13 +54,11 @@ export default function LoginPage() {
 
 			setUsername('');
 			setPassword('');
-			toast.success(`Welcome, ${data.username || username}!`);
 
 			// Redirect to home page
 			router.push('/');
 		} catch (error: any) {
 			setError(error.message);
-			toast.error(error.message);
 		} finally {
 			setLoading(false);
 		}
