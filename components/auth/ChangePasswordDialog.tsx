@@ -9,7 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'react-toastify';
 
 interface ChangePasswordDialogProps {
 	open: boolean;
@@ -29,7 +29,6 @@ export const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
 	const [confirmNewPassword, setConfirmNewPassword] = useState('');
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
-	const { toast } = useToast();
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -74,11 +73,7 @@ export const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
 			setConfirmNewPassword('');
 		} catch (error: any) {
 			setError(error.message);
-			toast({
-				title: 'Error',
-				description: error.message,
-				variant: 'destructive',
-			});
+			toast.error(error.message);
 			if (
 				error.message === 'Invalid token' ||
 				error.message === 'No token provided'

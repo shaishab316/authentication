@@ -1,12 +1,6 @@
 import { useState, useEffect } from 'react';
-import type { Account } from './useAccounts';
 import { TOTP } from 'totp-generator';
-
-export interface CodeData {
-	current: string;
-	timeRemaining: number;
-	progress: number;
-}
+import type { Account, CodeData } from '@/types/account';
 
 export const useTOTP = (accounts: Account[], isAuthenticated: boolean) => {
 	const [codes, setCodes] = useState<{ [key: string]: CodeData }>({});

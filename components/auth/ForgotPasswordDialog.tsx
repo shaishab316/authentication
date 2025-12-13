@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'react-toastify';
 
 interface ForgotPasswordDialogProps {
 	open: boolean;
@@ -24,7 +24,6 @@ export const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({
 	const [username, setUsername] = useState('');
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
-	const { toast } = useToast();
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -54,11 +53,7 @@ export const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({
 			setUsername('');
 		} catch (error: any) {
 			setError(error.message);
-			toast({
-				title: 'Error',
-				description: error.message,
-				variant: 'destructive',
-			});
+			toast.error(error.message);
 		} finally {
 			setLoading(false);
 		}

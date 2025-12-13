@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'react-toastify';
 import { getDisplacementFilter } from '@/components/ui/LiquidGlass';
 import { TOTP } from 'totp-generator';
 
@@ -35,26 +35,17 @@ export const AddAccountDialog: React.FC<AddAccountDialogProps> = ({
 		secret: '',
 		tags: '',
 	});
-	const { toast } = useToast();
 
 	const handleAdd = async () => {
 		if (!newAccount.name || !newAccount.secret) {
-			toast({
-				title: 'Error',
-				description: 'Please fill in all required fields',
-				variant: 'destructive',
-			});
+			toast.error('Please fill in all required fields');
 			return;
 		}
 
 		try {
 			await TOTP.generate(newAccount.secret);
 		} catch (error) {
-			toast({
-				title: 'Invalid Secret',
-				description: 'Please enter a valid base32 secret key',
-				variant: 'destructive',
-			});
+			toast.error('Please enter a valid base32 secret key');
 			return;
 		}
 
@@ -74,16 +65,9 @@ export const AddAccountDialog: React.FC<AddAccountDialogProps> = ({
 			await onAdd(accountData);
 			setNewAccount({ name: '', issuer: '', secret: '', tags: '' });
 			setOpen(false);
-			toast({
-				title: 'Account Added',
-				description: `${accountData.name} has been added successfully`,
-			});
+			toast.success(`${accountData.name} has been added successfully`);
 		} catch (error) {
-			toast({
-				title: 'Error',
-				description: 'Failed to add account to database.',
-				variant: 'destructive',
-			});
+			toast.error('Failed to add account to database.');
 		}
 	};
 

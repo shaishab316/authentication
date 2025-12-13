@@ -3,7 +3,8 @@ import type { Metadata } from 'next';
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
 import './globals.css';
-import { Toaster } from '@/components/ui/toaster';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export const metadata: Metadata = {
 	title: 'Auth316 | 2FA Authenticator',
@@ -33,7 +34,7 @@ html {
 			</head>
 			<body>
 				{children}
-				<Toaster />
+				<ToastContainer position='top-right' autoClose={3000} />
 			</body>
 		</html>
 	);

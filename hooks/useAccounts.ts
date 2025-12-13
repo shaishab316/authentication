@@ -1,13 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
-
-export interface Account {
-	_id: string;
-	name: string;
-	issuer: string;
-	secret: string;
-	tags: string[];
-}
+import type { Account } from '@/types/account';
+import { toast } from 'react-toastify';
 
 export const useAccounts = (
 	isAuthenticated: boolean,
@@ -15,7 +8,6 @@ export const useAccounts = (
 	onLogout: () => void
 ) => {
 	const [accounts, setAccounts] = useState<Account[]>([]);
-	const { toast } = useToast();
 
 	const fetchAccounts = async (token: string) => {
 		try {
@@ -31,12 +23,7 @@ export const useAccounts = (
 			setAccounts(data);
 		} catch (error) {
 			console.error('Error fetching accounts:', error);
-			toast({
-				title: 'Error',
-				description:
-					'Failed to load accounts from database. Please log in again.',
-				variant: 'destructive',
-			});
+			toast.error('Failed to load accounts. Please log in again.');
 			onLogout();
 		}
 	};

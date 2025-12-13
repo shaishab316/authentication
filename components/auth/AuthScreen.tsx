@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Shield } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'react-toastify';
 import { ForgotPasswordDialog } from './ForgotPasswordDialog';
 
 interface AuthScreenProps {
@@ -19,8 +19,6 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
 	const [error, setError] = useState('');
 	const [isForgotPasswordDialogOpen, setIsForgotPasswordDialogOpen] =
 		useState(false);
-	const { toast } = useToast();
-
 	const handleAuth = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setLoading(true);
@@ -46,17 +44,10 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
 			onLogin(data.token, username);
 			setUsername('');
 			setPassword('');
-			toast({
-				title: isLoginMode ? 'Login Successful' : 'Registration Successful',
-				description: `Welcome, ${data.username || username}!`,
-			});
+			toast.success(`Welcome, ${data.username || username}!`);
 		} catch (error: any) {
 			setError(error.message);
-			toast({
-				title: 'Authentication Error',
-				description: error.message,
-				variant: 'destructive',
-			});
+			toast.error(error.message);
 		} finally {
 			setLoading(false);
 		}

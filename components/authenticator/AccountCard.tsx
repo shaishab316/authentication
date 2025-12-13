@@ -4,8 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Copy, Trash2 } from 'lucide-react';
-import type { Account } from '@/hooks/useAccounts';
-import type { CodeData } from '@/hooks/useTOTP';
+import type { Account, CodeData } from '@/types/account';
 
 interface AccountCardProps {
 	account: Account;

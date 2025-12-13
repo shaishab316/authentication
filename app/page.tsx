@@ -1,10 +1,11 @@
 'use client';
 import type React from 'react';
-import { useState, useMemo } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
-import { useAccounts } from '@/hooks/useAccounts';
-import { useTOTP } from '@/hooks/useTOTP';
+import { useState, useMemo, useEffect } from 'react';
+import { toast } from 'react-toastify';
+import { accountService } from '@/services/accountService';
+import { authService } from '@/services/authService';
+import { totpService } from '@/services/totpService';
+import type { Account, CodeData } from '@/types/account';
 import { AuthScreen } from '@/components/auth/AuthScreen';
 import { Header } from '@/components/authenticator/Header';
 import { SearchBar } from '@/components/authenticator/SearchBar';
@@ -12,21 +13,51 @@ import { AccountList } from '@/components/authenticator/AccountList';
 import { AddAccountDialog } from '@/components/authenticator/AddAccountDialog';
 
 export default function AuthenticatorApp() {
+	const [isAuthenticated, setIsAuthenticated] = useState(false);
+	const [userToken, setUserToken] = useState<string | null>(null);
+	const [currentUsername, setCurrentUsername] = useState<string | null>(null);
+	const [accounts, setAccounts] = useState<Account[]>([]);
+	const [codes, setCodes] = useState<{ [key: string]: CodeData }>({});
 	const [searchQuery, setSearchQuery] = useState('');
 	const [isChangePasswordDialogOpen, setIsChangePasswordDialogOpen] =
 		useState(false);
 
-	const { toast } = useToast();
-	const { isAuthenticated, userToken, currentUsername, login, logout } =
-		useAuth();
-	const { accounts, addAccount, removeAccount } = useAccounts(
-		isAuthenticated,
-		userToken,
-		logout
-	);
-	const codes = useTOTP(accounts, isAuthenticated);
+	useEffect(() => {
+		const stored = authService.getStoredAuth();
+		if (stored) {
+			setUserToken(stored.token);
+			setCurrentUsername(stored.username);
+			setIsAuthenticated(true);
+		}
+	}, []);
 
-	// Get all unique tags for filtering
+	useEffect(() => {
+		if (isAuthenticated && userToken) {
+			accountService
+				.fetchAccounts(userToken)
+				.then(setAccounts)
+				.catch((error) => {
+					console.error('Error fetching accounts:', error);
+					toast.error('Failed to load accounts. Please log in again.');
+					handleLogout();
+				});
+		} else {
+			setAccounts([]);
+		}
+	}, [isAuthenticated, userToken]);
+
+	useEffect(() => {
+		if (!isAuthenticated || accounts.length === 0) return;
+
+		const updateCodes = () => {
+			setCodes(totpService.generateCodes(accounts));
+		};
+
+		updateCodes();
+		const interval = setInterval(updateCodes, 1000);
+		return () => clearInterval(interval);
+	}, [accounts, isAuthenticated]);
+
 	const allTags = useMemo(() => {
 		const tagSet = new Set<string>();
 		accounts.forEach((account) => {
@@ -35,54 +66,6 @@ export default function AuthenticatorApp() {
 		return Array.from(tagSet).sort();
 	}, [accounts]);
 
-	const handleLogout = () => {
-		logout();
-		toast({
-			title: 'Logged Out',
-			description: 'You have been successfully logged out.',
-		});
-	};
-
-	const handleLogin = (token: string, username: string) => {
-		login(token, username);
-	};
-
-	const handleRemoveAccount = async (e: React.MouseEvent, id: string) => {
-		e.stopPropagation();
-		try {
-			await removeAccount(id);
-			toast({
-				title: 'Account Removed',
-				description: 'Account has been removed successfully',
-			});
-		} catch (error: any) {
-			toast({
-				title: 'Error',
-				description: 'Failed to remove account from database.',
-				variant: 'destructive',
-			});
-			if (
-				error.message === 'Invalid token' ||
-				error.message === 'No token provided'
-			) {
-				handleLogout();
-			}
-		}
-	};
-
-	const handleCopyCode = (code: string, accountName: string) => {
-		navigator.clipboard.writeText(code);
-		toast({
-			title: 'Copied!',
-			description: `${accountName} code copied`,
-		});
-	};
-
-	const searchByTag = (tag: string) => {
-		setSearchQuery(`tag:${tag}`);
-	};
-
-	// Calculate filtered accounts for result count
 	const filteredAccounts = useMemo(() => {
 		if (!searchQuery.trim()) return accounts;
 		const query = searchQuery.toLowerCase().trim();
@@ -102,6 +85,56 @@ export default function AuthenticatorApp() {
 			);
 		});
 	}, [accounts, searchQuery]);
+
+	const handleLogin = async (token: string, username: string) => {
+		authService.storeAuth(token, username);
+		setUserToken(token);
+		setCurrentUsername(username);
+		setIsAuthenticated(true);
+	};
+
+	const handleLogout = () => {
+		authService.clearAuth();
+		setIsAuthenticated(false);
+		setUserToken(null);
+		setCurrentUsername(null);
+		setAccounts([]);
+		toast.success('You have been successfully logged out.');
+	};
+
+	const handleAddAccount = async (accountData: Omit<Account, '_id'>) => {
+		if (!userToken) throw new Error('No token');
+		const newAccount = await accountService.addAccount(accountData, userToken);
+		setAccounts((prev) => [...prev, newAccount]);
+		return newAccount;
+	};
+
+	const handleRemoveAccount = async (e: React.MouseEvent, id: string) => {
+		e.stopPropagation();
+		try {
+			if (!userToken) throw new Error('No token');
+			await accountService.removeAccount(id, userToken);
+			setAccounts((prev) => prev.filter((acc) => acc._id !== id));
+			toast.success('Account has been removed successfully');
+		} catch (error: any) {
+			toast.error('Failed to remove account from database.');
+			if (
+				error.message === 'Invalid token' ||
+				error.message === 'No token provided'
+			) {
+				handleLogout();
+			}
+		}
+	};
+
+	const handleCopyCode = (code: string, accountName: string) => {
+		navigator.clipboard.writeText(code);
+		toast.success(`${accountName} code copied`);
+	};
+
+	const searchByTag = (tag: string) => {
+		setSearchQuery(`tag:${tag}`);
+	};
 
 	if (!isAuthenticated) {
 		return <AuthScreen onLogin={handleLogin} />;
@@ -134,7 +167,7 @@ export default function AuthenticatorApp() {
 					onRemove={handleRemoveAccount}
 				/>
 
-				<AddAccountDialog onAdd={addAccount} />
+				<AddAccountDialog onAdd={handleAddAccount} />
 			</div>
 		</div>
 	);
