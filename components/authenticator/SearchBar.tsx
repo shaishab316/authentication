@@ -25,13 +25,19 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
 	return (
 		<>
-			<div className='relative mb-6'>
+			<div className='mb-6 sticky top-4 z-10'>
 				<Search className='absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400' />
 				<Input
 					placeholder='Search accounts or use org:company, tag:work'
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
-					className='pl-10 pr-10 rounded-2xl border-gray-200 focus:border-blue-500 focus:ring-blue-500'
+					className='pl-10 pr-10 rounded-md border-gray-200 bg-white focus:border-blue-500 focus:ring-blue-500'
+					style={{
+						backgroundImage: `
+					radial-gradient(circle at 1px 1px, rgb(59 130 246 / 0.15) 1px, transparent 0)
+				`,
+						backgroundSize: '24px 24px',
+					}}
 				/>
 				{searchQuery && (
 					<Button

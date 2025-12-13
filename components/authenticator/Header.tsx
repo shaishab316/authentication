@@ -1,7 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Shield, LogOut, KeyRound } from 'lucide-react';
-import { getDisplacementFilter } from '@/components/ui/LiquidGlass';
 import { ChangePasswordDialog } from '../auth/ChangePasswordDialog';
 
 interface HeaderProps {
@@ -21,16 +20,8 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
 	return (
 		<div
-			className='flex items-center justify-between mb-6 px-4 py-2 rounded-md border border-gray-200 bg-white/90'
+			className='flex items-center justify-between mb-6 px-4 py-2 rounded-md border border-gray-200 bg-white'
 			style={{
-				backdropFilter: `blur(2px) url('${getDisplacementFilter({
-					height: 50,
-					width: 500,
-					radius: 4,
-					depth: 5,
-					strength: 100,
-					chromaticAberration: 0,
-				})}') blur(4px)`,
 				backgroundImage: `
 					radial-gradient(circle at 1px 1px, rgb(59 130 246 / 0.15) 1px, transparent 0)
 				`,
