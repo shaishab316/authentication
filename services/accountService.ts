@@ -3,10 +3,26 @@ import type { Account } from '@/types/account';
 class AccountService {
 	private baseUrl = '/api/accounts';
 
-	async fetchAccounts(token: string): Promise<Account[]> {
-		const response = await fetch(this.baseUrl, {
-			headers: { Authorization: `Bearer ${token}` },
-		});
+	async fetchAccounts(
+		token: string,
+		page: number = 1,
+		limit: number = 50
+	): Promise<{
+		accounts: Account[];
+		pagination: {
+			page: number;
+			limit: number;
+			total: number;
+			totalPages: number;
+			hasMore: boolean;
+		};
+	}> {
+		const response = await fetch(
+			`${this.baseUrl}?page=${page}&limit=${limit}`,
+			{
+				headers: { Authorization: `Bearer ${token}` },
+			}
+		);
 		if (!response.ok) throw new Error('Failed to fetch accounts');
 		return response.json();
 	}

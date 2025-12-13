@@ -25,6 +25,10 @@ export default function AuthenticatorApp() {
 		useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [currentPage, setCurrentPage] = useState(1);
+	const [totalPages, setTotalPages] = useState(1);
+	const [totalAccounts, setTotalAccounts] = useState(0);
+	const ACCOUNTS_PER_PAGE = 10;
 
 	useEffect(() => {
 		const stored = authService.getStoredAuth();
@@ -33,7 +37,6 @@ export default function AuthenticatorApp() {
 			setCurrentUsername(stored.username);
 			setIsAuthenticated(true);
 		} else {
-			// Redirect to login if not authenticated
 			router.push('/login');
 		}
 	}, [router]);
@@ -43,16 +46,16 @@ export default function AuthenticatorApp() {
 			setIsLoading(true);
 			setError(null);
 			accountService
-				.fetchAccounts(userToken)
+				.fetchAccounts(userToken, currentPage, ACCOUNTS_PER_PAGE)
 				.then((data) => {
-					setAccounts(data);
+					setAccounts(data.accounts);
+					setTotalPages(data.pagination.totalPages);
+					setTotalAccounts(data.pagination.total);
 					setIsLoading(false);
 					setError(null);
 				})
 				.catch((error) => {
 					console.error('Error fetching accounts:', error);
-					setError(error.message || 'Failed to load accounts');
-					setIsLoading(false);
 					setError(error.message || 'Failed to load accounts');
 					setIsLoading(false);
 					toast.error('Failed to load accounts. Please log in again.');
@@ -62,7 +65,7 @@ export default function AuthenticatorApp() {
 			setAccounts([]);
 			setIsLoading(false);
 		}
-	}, [isAuthenticated, userToken]);
+	}, [isAuthenticated, userToken, currentPage]);
 
 	useEffect(() => {
 		if (!isAuthenticated || accounts.length === 0) return;
@@ -252,6 +255,116 @@ export default function AuthenticatorApp() {
 						searchQuery={searchQuery}
 						onRemove={handleRemoveAccount}
 					/>
+				)}
+
+				{/* Pagination Controls */}
+				{!isLoading && !error && totalPages > 1 && (
+					<div className='flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 mb-24 bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-gray-200'>
+						<div className='text-sm text-gray-600'>
+							Showing{' '}
+							<span className='font-semibold text-gray-900'>
+								{accounts.length}
+							</span>{' '}
+							of{' '}
+							<span className='font-semibold text-gray-900'>
+								{totalAccounts}
+							</span>{' '}
+							accounts
+						</div>
+						<div className='flex items-center gap-2'>
+							<Button
+								variant='outline'
+								size='sm'
+								onClick={() => setCurrentPage(1)}
+								disabled={currentPage === 1}
+								className='rounded-xl hover:bg-blue-50 hover:border-blue-300 disabled:opacity-50'
+							>
+								<svg
+									className='w-4 h-4'
+									fill='none'
+									viewBox='0 0 24 24'
+									stroke='currentColor'
+								>
+									<path
+										strokeLinecap='round'
+										strokeLinejoin='round'
+										strokeWidth={2}
+										d='M11 19l-7-7 7-7m8 14l-7-7 7-7'
+									/>
+								</svg>
+							</Button>
+							<Button
+								variant='outline'
+								size='sm'
+								onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+								disabled={currentPage === 1}
+								className='rounded-xl hover:bg-blue-50 hover:border-blue-300 disabled:opacity-50'
+							>
+								<svg
+									className='w-4 h-4'
+									fill='none'
+									viewBox='0 0 24 24'
+									stroke='currentColor'
+								>
+									<path
+										strokeLinecap='round'
+										strokeLinejoin='round'
+										strokeWidth={2}
+										d='M15 19l-7-7 7-7'
+									/>
+								</svg>
+							</Button>
+							<div className='flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold text-sm'>
+								<span>{currentPage}</span>
+								<span className='opacity-75'>/</span>
+								<span>{totalPages}</span>
+							</div>
+							<Button
+								variant='outline'
+								size='sm'
+								onClick={() =>
+									setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+								}
+								disabled={currentPage === totalPages}
+								className='rounded-xl hover:bg-blue-50 hover:border-blue-300 disabled:opacity-50'
+							>
+								<svg
+									className='w-4 h-4'
+									fill='none'
+									viewBox='0 0 24 24'
+									stroke='currentColor'
+								>
+									<path
+										strokeLinecap='round'
+										strokeLinejoin='round'
+										strokeWidth={2}
+										d='M9 5l7 7-7 7'
+									/>
+								</svg>
+							</Button>
+							<Button
+								variant='outline'
+								size='sm'
+								onClick={() => setCurrentPage(totalPages)}
+								disabled={currentPage === totalPages}
+								className='rounded-xl hover:bg-blue-50 hover:border-blue-300 disabled:opacity-50'
+							>
+								<svg
+									className='w-4 h-4'
+									fill='none'
+									viewBox='0 0 24 24'
+									stroke='currentColor'
+								>
+									<path
+										strokeLinecap='round'
+										strokeLinejoin='round'
+										strokeWidth={2}
+										d='M13 5l7 7-7 7M5 5l7 7-7 7'
+									/>
+								</svg>
+							</Button>
+						</div>
+					</div>
 				)}
 
 				{/* Floating Add Button with Enhanced Effects */}
