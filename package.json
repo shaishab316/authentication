@@ -74,6 +74,9 @@
     "zod": "3.25.67"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^12.0.2",
     "@tailwindcss/postcss": "^4.1.9",
     "@types/node": "^22",
     "@types/nodemailer": "^7.0.4",
@@ -82,6 +85,7 @@
     "eslint": "^9.39.2",
     "eslint-config-next": "16.0.10",
     "postcss": "^8.5",
+    "semantic-release": "^25.0.2",
     "tailwindcss": "^4.1.9",
     "tw-animate-css": "1.3.3",
     "typescript": "^5"
