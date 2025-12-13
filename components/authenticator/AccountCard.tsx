@@ -21,7 +21,11 @@ export const AccountCard: React.FC<AccountCardProps> = ({
 	const deleteTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
 	const formatCode = (code: string) => {
-		return code.replace(/(\d{3})(\d{3})/, '$1 $2');
+		try {
+			return code?.replace(/(\d{3})(\d{3})/, '$1 $2');
+		} catch {
+			return '--- ---';
+		}
 	};
 
 	const isLowTime = (codeData?.timeRemaining || 30) <= 5;
@@ -62,7 +66,7 @@ export const AccountCard: React.FC<AccountCardProps> = ({
 	}, []);
 
 	return (
-		<div className='group relative rounded-3xl cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg'>
+		<div className='group relative rounded-3xl cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg select-none'>
 			<CardContent
 				onClick={handleCopy}
 				className={`relative p-5 rounded-3xl border-2 active:scale-[0.98] transition-all duration-200 ${
@@ -115,16 +119,18 @@ export const AccountCard: React.FC<AccountCardProps> = ({
 
 						{/* Code and timer */}
 						<div className='flex items-center gap-4'>
-							<span className='text-3xl font-mono font-bold text-gray-900 tracking-wider'>
-								{codeData ? formatCode(codeData.current) : '--- ---'}
-							</span>
+							{isCopied ? (
+								<div className='flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-100 text-green-700 animate-in fade-in zoom-in duration-200'>
+									<Check className='w-3.5 h-3.5' />
+									<span className='text-sm font-semibold'>Copied!</span>
+								</div>
+							) : (
+								<span className='text-3xl font-mono font-bold text-gray-900 tracking-wider select-text'>
+									{codeData ? formatCode(codeData.current) : '--- ---'}
+								</span>
+							)}
 							<div className='flex items-center gap-2'>
-								{isCopied ? (
-									<div className='flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-100 text-green-700 animate-in fade-in zoom-in duration-200'>
-										<Check className='w-3.5 h-3.5' />
-										<span className='text-sm font-semibold'>Copied!</span>
-									</div>
-								) : (
+								{!isCopied && (
 									<div
 										className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full transition-all duration-300 ${
 											isLowTime

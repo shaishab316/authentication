@@ -4,8 +4,17 @@ import type { Account, CodeData } from '@/types/account';
 class TotpService {
 	async generateCode(secret: string, period: number = 30): Promise<string> {
 		try {
-			const { otp } = await TOTP.generate(secret, { period });
+			// Clean the secret: remove spaces, convert to uppercase, remove invalid chars
+			const cleanSecret = secret
+				?.replace(/\s/g, '')
+				?.toUpperCase()
+				?.replace(/[^A-Z2-7]/g, '');
 
+			if (!cleanSecret) {
+				return '------';
+			}
+
+			const { otp } = await TOTP.generate(cleanSecret, { period });
 			return otp;
 		} catch (error) {
 			console.error('Error generating TOTP:', error);

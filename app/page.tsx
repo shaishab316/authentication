@@ -70,12 +70,45 @@ export default function AuthenticatorApp() {
 	useEffect(() => {
 		if (!isAuthenticated || accounts.length === 0) return;
 
-		const updateCodes = () => {
-			setCodes(totpService.generateCodes(accounts));
-		};
+		// Generate initial codes
+		const initialCodes = totpService.generateCodes(accounts);
+		setCodes(initialCodes);
 
-		updateCodes();
-		const interval = setInterval(updateCodes, 1000);
+		// Update timer only, regenerate codes when period expires
+		const interval = setInterval(() => {
+			const now = Math.floor(Date.now() / 1000);
+			let needsRegeneration = false;
+
+			setCodes((prevCodes) => {
+				const updatedCodes = { ...prevCodes };
+
+				accounts.forEach(async (account) => {
+					const period = account.period || 30;
+					const timeRemaining = period - (now % period);
+					const progress = (timeRemaining / period) * 100;
+
+					// Only regenerate code when period resets (timeRemaining is at max)
+					if (timeRemaining === period || !prevCodes[account._id]) {
+						needsRegeneration = true;
+						const current = await totpService.generateCode(
+							account.secret,
+							period
+						);
+						updatedCodes[account._id] = { current, timeRemaining, progress };
+					} else {
+						// Just update timer, keep existing code
+						updatedCodes[account._id] = {
+							...prevCodes[account._id],
+							timeRemaining,
+							progress,
+						};
+					}
+				});
+
+				return updatedCodes;
+			});
+		}, 1000);
+
 		return () => clearInterval(interval);
 	}, [accounts, isAuthenticated]);
 
