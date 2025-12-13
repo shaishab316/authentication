@@ -1,6 +1,7 @@
 'use client';
 import type React from 'react';
 import { useState, useMemo, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { accountService } from '@/services/accountService';
 import { authService } from '@/services/authService';
@@ -10,9 +11,11 @@ import { AuthScreen } from '@/components/auth/AuthScreen';
 import { Header } from '@/components/authenticator/Header';
 import { SearchBar } from '@/components/authenticator/SearchBar';
 import { AccountList } from '@/components/authenticator/AccountList';
-import { AddAccountDialog } from '@/components/authenticator/AddAccountDialog';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 export default function AuthenticatorApp() {
+	const router = useRouter();
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [userToken, setUserToken] = useState<string | null>(null);
 	const [currentUsername, setCurrentUsername] = useState<string | null>(null);
@@ -102,13 +105,6 @@ export default function AuthenticatorApp() {
 		toast.success('You have been successfully logged out.');
 	};
 
-	const handleAddAccount = async (accountData: Omit<Account, '_id'>) => {
-		if (!userToken) throw new Error('No token');
-		const newAccount = await accountService.addAccount(accountData, userToken);
-		setAccounts((prev) => [...prev, newAccount]);
-		return newAccount;
-	};
-
 	const handleRemoveAccount = async (e: React.MouseEvent, id: string) => {
 		e.stopPropagation();
 		try {
@@ -161,7 +157,15 @@ export default function AuthenticatorApp() {
 					onRemove={handleRemoveAccount}
 				/>
 
-				<AddAccountDialog onAdd={handleAddAccount} />
+				<Button
+					onClick={() => router.push('/add-account')}
+					className='w-fit h-12 sm:h-12 text-sm sm:text-base font-medium fixed bottom-4 right-4 sm:bottom-10 sm:right-10 px-3 sm:px-4 py-2 rounded-2xl border-2 border-gray-200 text-black bg-white hover:bg-white hover:border-blue-300 hover:shadow-lg group flex justify-center items-center gap-2 overflow-hidden transition-all duration-300 z-50'
+				>
+					<Plus className='size-5 transition-transform duration-300 group-hover:rotate-90' />
+					<span className='hidden sm:group-hover:inline-block'>
+						Add Account
+					</span>
+				</Button>
 			</div>
 		</div>
 	);
