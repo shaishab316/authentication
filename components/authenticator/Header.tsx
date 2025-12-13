@@ -21,7 +21,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
 	return (
 		<div
-			className='flex items-center justify-between mb-6 sticky top-4 z-[999] px-4 py-2 rounded-md border border-gray-200'
+			className='flex items-center justify-between mb-6 px-4 py-2 rounded-md border border-gray-200 bg-white/90'
 			style={{
 				backdropFilter: `blur(2px) url('${getDisplacementFilter({
 					height: 50,
@@ -31,6 +31,10 @@ export const Header: React.FC<HeaderProps> = ({
 					strength: 100,
 					chromaticAberration: 0,
 				})}') blur(4px)`,
+				backgroundImage: `
+					radial-gradient(circle at 1px 1px, rgb(59 130 246 / 0.15) 1px, transparent 0)
+				`,
+				backgroundSize: '24px 24px',
 			}}
 		>
 			<div className='flex items-center gap-3'>

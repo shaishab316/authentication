@@ -1,3 +1,4 @@
+'use client';
 import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertCircle, Plus, Search as SearchIcon } from 'lucide-react';
