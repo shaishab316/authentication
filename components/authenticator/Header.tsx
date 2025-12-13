@@ -35,7 +35,11 @@ export const Header: React.FC<HeaderProps> = ({
 							Auth316
 						</h1>
 						<span className='text-xs sm:text-sm font-medium text-gray-600'>
-							{currentUsername}
+							{currentUsername
+								? `${currentUsername.slice(0, 5)}*****${currentUsername.slice(
+										currentUsername.indexOf('@')
+								  )}`
+								: 'Guest'}
 						</span>
 					</div>
 				</div>

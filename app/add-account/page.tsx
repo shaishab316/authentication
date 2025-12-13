@@ -18,6 +18,7 @@ import {
 import { TOTP } from 'totp-generator';
 import { accountService } from '@/services/accountService';
 import { authService } from '@/services/authService';
+import jsQR from 'jsqr';
 
 export default function AddAccountPage() {
 	const router = useRouter();
@@ -259,11 +260,7 @@ export default function AddAccountPage() {
 				ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
 				const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-				const code = jsQR(
-					imageData.data,
-					imageData.width,
-					imageData.height
-				) as any;
+				const code = jsQR(imageData.data, imageData.width, imageData.height);
 
 				if (code && code.data) {
 					try {
@@ -279,15 +276,6 @@ export default function AddAccountPage() {
 				}
 			}
 		}, 300);
-	};
-
-	// Simple QR code detection (you can replace with a proper library)
-	const jsQR = (data: Uint8ClampedArray, width: number, height: number) => {
-		// This is a placeholder - in production, use jsQR library or similar
-		// For now, we'll return null to demonstrate the UI
-
-		console.log(data);
-		return null;
 	};
 
 	if (isSuccess) {
