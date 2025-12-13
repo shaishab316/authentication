@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Shield } from 'lucide-react';
+import { Shield, Eye, EyeOff } from 'lucide-react';
 import { authService } from '@/services/authService';
 import { ForgotPasswordDialog } from '@/components/auth/ForgotPasswordDialog';
 
@@ -16,6 +16,7 @@ export default function LoginPage() {
 	const [password, setPassword] = useState('');
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
+	const [showPassword, setShowPassword] = useState(false);
 	const [isForgotPasswordDialogOpen, setIsForgotPasswordDialogOpen] =
 		useState(false);
 
@@ -118,7 +119,7 @@ export default function LoginPage() {
 						</p>
 					</div>
 
-					<form onSubmit={handleAuth} className='space-y-5'>
+					<form onSubmit={handleAuth} className='space-y-5' autoComplete='on'>
 						<div className='text-left space-y-2 group'>
 							<Label
 								htmlFor='username'
@@ -133,6 +134,7 @@ export default function LoginPage() {
 									placeholder='Enter your username'
 									value={username}
 									onChange={(e) => setUsername(e.target.value)}
+									autoComplete='username'
 									required
 									className='rounded-2xl h-14 text-base pl-4 pr-4 bg-white/50 backdrop-blur-sm border-2 border-gray-200 hover:border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300 shadow-sm hover:shadow-md'
 								/>
@@ -148,13 +150,29 @@ export default function LoginPage() {
 							<div className='relative'>
 								<Input
 									id='password'
-									type='password'
+									type={showPassword ? 'text' : 'password'}
 									placeholder='Enter your password'
 									value={password}
 									onChange={(e) => setPassword(e.target.value)}
+									autoComplete={
+										isLoginMode ? 'current-password' : 'new-password'
+									}
 									required
-									className='rounded-2xl h-14 text-base pl-4 pr-4 bg-white/50 backdrop-blur-sm border-2 border-gray-200 hover:border-purple-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 shadow-sm hover:shadow-md'
+									className='rounded-2xl h-14 text-base pl-4 pr-14 bg-white/50 backdrop-blur-sm border-2 border-gray-200 hover:border-purple-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 shadow-sm hover:shadow-md'
 								/>
+								<Button
+									type='button'
+									variant='ghost'
+									size='sm'
+									onClick={() => setShowPassword(!showPassword)}
+									className='absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 p-0 rounded-xl hover:bg-purple-100 transition-all duration-200'
+								>
+									{showPassword ? (
+										<EyeOff className='w-5 h-5 text-gray-500 hover:text-purple-600 transition-colors' />
+									) : (
+										<Eye className='w-5 h-5 text-gray-500 hover:text-purple-600 transition-colors' />
+									)}
+								</Button>
 							</div>
 						</div>
 						{error && (

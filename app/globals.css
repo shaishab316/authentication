@@ -135,3 +135,22 @@ a {
 		@apply bg-background text-foreground;
 	}
 }
+
+/* QR Scanner Animations */
+@keyframes scan-line {
+  0% {
+    top: 0;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+.animate-scan-line {
+  animation: scan-line 2s linear infinite;
+}
