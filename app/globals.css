@@ -8,6 +8,15 @@ a {
 	cursor: pointer;
 }
 
+@keyframes gridMove {
+	0% {
+		transform: translate(0, 0);
+	}
+	100% {
+		transform: translate(40px, 40px);
+	}
+}
+
 :root {
 	--background: oklch(1 0 0);
 	--foreground: oklch(0.145 0 0);
@@ -125,4 +134,23 @@ a {
 	body {
 		@apply bg-background text-foreground;
 	}
+}
+
+/* QR Scanner Animations */
+@keyframes scan-line {
+  0% {
+    top: 0;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+.animate-scan-line {
+  animation: scan-line 2s linear infinite;
 }

@@ -41,7 +41,19 @@ export async function GET(req: Request) {
 
 	await dbConnect();
 	try {
-		const accounts = await Account.find({ userId: authResult.userId });
+		const { searchParams } = new URL(req.url);
+		const page = parseInt(searchParams.get('page') || '1');
+		const limit = parseInt(searchParams.get('limit') || '50');
+		const skip = (page - 1) * limit;
+
+		const totalAccounts = await Account.countDocuments({
+			userId: authResult.userId,
+		});
+		const accounts = await Account.find({ userId: authResult.userId })
+			.skip(skip)
+			.limit(limit)
+			.sort({ createdAt: -1 });
+
 		// Decrypt secrets before sending to client
 		const decryptedAccounts = accounts
 			.map((account) => ({
@@ -49,7 +61,20 @@ export async function GET(req: Request) {
 				secret: decrypt(account.secret),
 			}))
 			.filter((account) => account.secret !== '');
-		return NextResponse.json(decryptedAccounts, { status: 200 });
+
+		return NextResponse.json(
+			{
+				accounts: decryptedAccounts,
+				pagination: {
+					page,
+					limit,
+					total: totalAccounts,
+					totalPages: Math.ceil(totalAccounts / limit),
+					hasMore: page * limit < totalAccounts,
+				},
+			},
+			{ status: 200 }
+		);
 	} catch (error) {
 		console.error('Error fetching accounts:', error);
 		return NextResponse.json(
@@ -68,7 +93,7 @@ export async function POST(req: Request) {
 	await dbConnect();
 	try {
 		const body = await req.json();
-		const { name, issuer, secret, tags } = body;
+		const { name, issuer, secret, tags, period } = body;
 
 		// Encrypt secret before saving
 		const encryptedSecret = encrypt(secret);
@@ -79,6 +104,7 @@ export async function POST(req: Request) {
 			issuer,
 			secret: encryptedSecret,
 			tags,
+			period: period ?? 30,
 		});
 		// Decrypt the secret for the response, as the client expects it decrypted
 		const responseAccount = newAccount.toObject();

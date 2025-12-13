@@ -1,6 +1,7 @@
+'use client';
 import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { AlertCircle, Plus, Search as SearchIcon } from 'lucide-react';
+import { Plus, Search as SearchIcon } from 'lucide-react';
 import type { Account, CodeData } from '@/types/account';
 import { AccountCard } from './AccountCard';
 
@@ -8,7 +9,6 @@ interface AccountListProps {
 	accounts: Account[];
 	codes: { [key: string]: CodeData };
 	searchQuery: string;
-	onCopy: (code: string, accountName: string) => void;
 	onRemove: (e: React.MouseEvent, id: string) => void;
 }
 
@@ -16,7 +16,6 @@ export const AccountList: React.FC<AccountListProps> = ({
 	accounts,
 	codes,
 	searchQuery,
-	onCopy,
 	onRemove,
 }) => {
 	const filteredAccounts = useMemo(() => {
@@ -45,25 +44,29 @@ export const AccountList: React.FC<AccountListProps> = ({
 
 	if (filteredAccounts.length === 0) {
 		return (
-			<Card className='rounded-2xl border border-gray-200'>
-				<CardContent className='p-8 text-center'>
+			<Card className='rounded-3xl border border-white/50 bg-white/60 backdrop-blur-xl shadow-lg'>
+				<CardContent className='p-10 text-center'>
 					{searchQuery ? (
 						<>
-							<SearchIcon className='w-12 h-12 text-gray-400 mx-auto mb-4' />
-							<h3 className='text-lg font-medium text-gray-900 mb-2'>
+							<div className='w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-md'>
+								<SearchIcon className='w-8 h-8 text-gray-400' />
+							</div>
+							<h3 className='text-xl font-bold text-gray-900 mb-2'>
 								No results found
 							</h3>
-							<p className='text-gray-600 text-sm'>
+							<p className='text-gray-600'>
 								No accounts match your search. Try a different query.
 							</p>
 						</>
 					) : (
 						<>
-							<AlertCircle className='w-12 h-12 text-gray-400 mx-auto mb-4' />
-							<h3 className='text-lg font-medium text-gray-900 mb-2'>
+							<div className='w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg animate-pulse'>
+								<Plus className='w-8 h-8 text-white' />
+							</div>
+							<h3 className='text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2'>
 								No accounts yet
 							</h3>
-							<p className='text-gray-600 text-sm'>
+							<p className='text-gray-600'>
 								Add your first account to get started with two-factor
 								authentication.
 							</p>
@@ -75,15 +78,15 @@ export const AccountList: React.FC<AccountListProps> = ({
 	}
 
 	return (
-		<div className='space-y-4 mb-6'>
+		<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6'>
 			{filteredAccounts.map((account) => {
 				const codeData = codes[account._id];
+
 				return (
 					<AccountCard
 						key={account._id}
 						account={account}
 						codeData={codeData}
-						onCopy={onCopy}
 						onRemove={onRemove}
 					/>
 				);

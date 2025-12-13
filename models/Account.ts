@@ -1,21 +1,24 @@
-import mongoose, { Schema, type Document } from "mongoose"
+import mongoose, { Schema, type Document } from 'mongoose';
 
 export interface IAccount extends Document {
-  userId: mongoose.Types.ObjectId // Link to User model
-  name: string
-  issuer: string
-  secret: string // This will store the encrypted secret
-  tags: string[]
+	userId: mongoose.Types.ObjectId; // Link to User model
+	name: string;
+	issuer: string;
+	secret: string; // This will store the encrypted secret
+	tags: string[];
+	period: number; // TOTP time period in seconds (default: 30)
 }
 
 const AccountSchema: Schema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  name: { type: String, required: true },
-  issuer: { type: String, required: true },
-  secret: { type: String, required: true }, // Stores encrypted string
-  tags: { type: [String], default: [] },
-})
+	userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+	name: { type: String, required: true },
+	issuer: { type: String, required: true },
+	secret: { type: String, required: true }, // Stores encrypted string
+	tags: { type: [String], default: [] },
+	period: { type: Number, default: 30 }, // TOTP time period in seconds
+});
 
-const Account = mongoose.models.Account || mongoose.model<IAccount>("Account", AccountSchema)
+const Account =
+	mongoose.models.Account || mongoose.model<IAccount>('Account', AccountSchema);
 
-export default Account
+export default Account;
