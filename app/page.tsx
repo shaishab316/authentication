@@ -127,11 +127,6 @@ export default function AuthenticatorApp() {
 		}
 	};
 
-	const handleCopyCode = (code: string, accountName: string) => {
-		navigator.clipboard.writeText(code);
-		toast.success(`${accountName} code copied`);
-	};
-
 	const searchByTag = (tag: string) => {
 		setSearchQuery(`tag:${tag}`);
 	};
@@ -163,7 +158,6 @@ export default function AuthenticatorApp() {
 					accounts={accounts}
 					codes={codes}
 					searchQuery={searchQuery}
-					onCopy={handleCopyCode}
 					onRemove={handleRemoveAccount}
 				/>
 

@@ -8,7 +8,6 @@ interface AccountListProps {
 	accounts: Account[];
 	codes: { [key: string]: CodeData };
 	searchQuery: string;
-	onCopy: (code: string, accountName: string) => void;
 	onRemove: (e: React.MouseEvent, id: string) => void;
 }
 
@@ -16,7 +15,6 @@ export const AccountList: React.FC<AccountListProps> = ({
 	accounts,
 	codes,
 	searchQuery,
-	onCopy,
 	onRemove,
 }) => {
 	const filteredAccounts = useMemo(() => {
@@ -83,7 +81,6 @@ export const AccountList: React.FC<AccountListProps> = ({
 						key={account._id}
 						account={account}
 						codeData={codeData}
-						onCopy={onCopy}
 						onRemove={onRemove}
 					/>
 				);
