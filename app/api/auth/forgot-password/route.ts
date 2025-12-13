@@ -2,9 +2,7 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
-import { Resend } from 'resend';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendMail } from '@/lib/sentmail';
 
 // Helper to generate a random 8-character password
 function generateRandomPassword(length = 8): string {
@@ -48,9 +46,8 @@ export async function POST(req: Request) {
 		await user.save();
 
 		try {
-			await resend.emails.send({
-				from: 'Auth316 <shaishab316@resend.dev>',
-				to: [user.username],
+			await sendMail({
+				to: user.username,
 				subject: 'Your auth316 password has been reset',
 				html: `<p>Your new password is: <strong>${newPassword}</strong></p>`,
 			});
