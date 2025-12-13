@@ -34,6 +34,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 	const [showShortcuts, setShowShortcuts] = useState(false);
 	const [recentSearches, setRecentSearches] = useState<string[]>([]);
 	const [animateSearch, setAnimateSearch] = useState(false);
+	const [localValue, setLocalValue] = useState('');
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
@@ -54,28 +55,50 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 		return () => window.removeEventListener('keydown', handleKeyDown);
 	}, []);
 
+	const handleSearch = () => {
+		if (localValue.trim()) {
+			setSearchQuery(localValue);
+			// Save to recent searches
+			const updated = [
+				localValue,
+				...recentSearches.filter((s) => s !== localValue),
+			].slice(0, 5);
+			setRecentSearches(updated);
+			localStorage.setItem('recentSearches', JSON.stringify(updated));
+			setAnimateSearch(true);
+			setTimeout(() => setAnimateSearch(false), 300);
+		}
+	};
+
+	const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		if (e.key === 'Enter') {
+			handleSearch();
+		}
+	};
+
 	const clearSearch = () => {
+		setLocalValue('');
 		setSearchQuery('');
 		setAnimateSearch(true);
 		setTimeout(() => setAnimateSearch(false), 300);
 	};
 
-	const handleSearch = (value: string) => {
-		setSearchQuery(value);
-		if (value.trim()) {
-			// Save to recent searches
-			const updated = [
-				value,
-				...recentSearches.filter((s) => s !== value),
-			].slice(0, 5);
-			setRecentSearches(updated);
-			localStorage.setItem('recentSearches', JSON.stringify(updated));
-		}
-	};
-
 	const useRecentSearch = (search: string) => {
+		setLocalValue(search);
 		setSearchQuery(search);
 		setIsFocused(false);
+	};
+
+	const deleteRecentSearch = (e: React.MouseEvent, searchToDelete: string) => {
+		e.stopPropagation();
+		const updated = recentSearches.filter((s) => s !== searchToDelete);
+		setRecentSearches(updated);
+		localStorage.setItem('recentSearches', JSON.stringify(updated));
+	};
+
+	const clearAllRecentSearches = () => {
+		setRecentSearches([]);
+		localStorage.removeItem('recentSearches');
 	};
 
 	return (
@@ -104,16 +127,29 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 						<Input
 							ref={inputRef}
 							placeholder='Search accounts or use org:company, tag:work...'
-							value={searchQuery}
-							onChange={(e) => handleSearch(e.target.value)}
+							value={localValue}
+							onChange={(e) => setLocalValue(e.target.value)}
+							onKeyDown={handleKeyPress}
 							onFocus={() => setIsFocused(true)}
 							onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-							className='pl-12 pr-24 h-14 rounded-2xl bg-white/80 backdrop-blur-xl border-white/50 shadow-lg hover:shadow-xl focus:shadow-2xl transition-all duration-300 text-base focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:ring-offset-2'
+							className='pl-12 pr-32 h-14 rounded-2xl bg-white/80 backdrop-blur-xl border-white/50 shadow-lg hover:shadow-xl focus:shadow-2xl transition-all duration-300 text-base focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:ring-offset-2'
 						/>
 
 						<div className='absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1'>
+							{/* Search button */}
+							{localValue && !searchQuery && (
+								<Button
+									variant='ghost'
+									size='sm'
+									onClick={handleSearch}
+									className='h-8 px-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white hover:scale-110 transition-all duration-200 active:scale-95 font-semibold text-xs shadow-lg'
+								>
+									Search
+								</Button>
+							)}
+
 							{/* Keyboard shortcut hint */}
-							{!searchQuery && !isFocused && (
+							{!localValue && !searchQuery && !isFocused && (
 								<div
 									className='hidden sm:flex items-center gap-1 px-2 py-1 rounded-lg bg-gray-100/80 border border-gray-200/50 animate-in fade-in duration-500'
 									onMouseEnter={() => setShowShortcuts(true)}
@@ -151,24 +187,42 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 					</div>
 
 					{/* Search suggestions dropdown */}
-					{isFocused && !searchQuery && recentSearches.length > 0 && (
+					{isFocused && !localValue && recentSearches.length > 0 && (
 						<div className='absolute top-full mt-2 w-full bg-white/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/50 p-3 animate-in slide-in-from-top-2 duration-200 z-30'>
-							<div className='flex items-center gap-2 mb-2 px-2'>
-								<Clock className='w-4 h-4 text-gray-400' />
-								<span className='text-xs font-semibold text-gray-500 uppercase tracking-wide'>
-									Recent Searches
-								</span>
+							<div className='flex items-center justify-between mb-2 px-2'>
+								<div className='flex items-center gap-2'>
+									<Clock className='w-4 h-4 text-gray-400' />
+									<span className='text-xs font-semibold text-gray-500 uppercase tracking-wide'>
+										Recent Searches
+									</span>
+								</div>
+								<Button
+									variant='ghost'
+									size='sm'
+									onClick={clearAllRecentSearches}
+									className='h-6 px-2 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200'
+								>
+									Clear All
+								</Button>
 							</div>
 							{recentSearches.map((search, idx) => (
 								<button
 									key={idx}
 									onClick={() => useRecentSearch(search)}
-									className='w-full text-left px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors duration-150 flex items-center gap-2 group/recent'
+									className='w-full text-left px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors duration-150 flex items-center justify-between group/recent'
 								>
-									<TrendingUp className='w-3.5 h-3.5 text-gray-400 group-hover/recent:text-blue-500 transition-colors' />
-									<span className='text-sm text-gray-700 group-hover/recent:text-blue-600 transition-colors'>
-										{search}
-									</span>
+									<div className='flex items-center gap-2 flex-1 min-w-0'>
+										<TrendingUp className='w-3.5 h-3.5 text-gray-400 group-hover/recent:text-blue-500 transition-colors flex-shrink-0' />
+										<span className='text-sm text-gray-700 group-hover/recent:text-blue-600 transition-colors truncate'>
+											{search}
+										</span>
+									</div>
+									<button
+										onClick={(e) => deleteRecentSearch(e, search)}
+										className='opacity-0 group-hover/recent:opacity-100 p-1 hover:bg-red-100 rounded-md transition-all duration-200 flex-shrink-0 ml-2'
+									>
+										<X className='w-3.5 h-3.5 text-red-500 hover:text-red-700' />
+									</button>
 								</button>
 							))}
 						</div>
