@@ -68,7 +68,7 @@ export async function POST(req: Request) {
 	await dbConnect();
 	try {
 		const body = await req.json();
-		const { name, issuer, secret, tags } = body;
+		const { name, issuer, secret, tags, period } = body;
 
 		// Encrypt secret before saving
 		const encryptedSecret = encrypt(secret);
@@ -79,6 +79,7 @@ export async function POST(req: Request) {
 			issuer,
 			secret: encryptedSecret,
 			tags,
+			period: period ?? 30,
 		});
 		// Decrypt the secret for the response, as the client expects it decrypted
 		const responseAccount = newAccount.toObject();
