@@ -4,6 +4,7 @@ export interface Account {
 	issuer: string;
 	secret: string;
 	tags: string[];
+	period?: number; // TOTP time period in seconds (default: 30)
 }
 
 export interface CodeData {

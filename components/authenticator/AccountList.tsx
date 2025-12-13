@@ -1,7 +1,7 @@
 'use client';
 import React, { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { AlertCircle, Plus, Search as SearchIcon } from 'lucide-react';
+import { Plus, Search as SearchIcon } from 'lucide-react';
 import type { Account, CodeData } from '@/types/account';
 import { AccountCard } from './AccountCard';
 

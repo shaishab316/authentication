@@ -24,6 +24,7 @@ export default function AddAccountPage() {
 		issuer: '',
 		secret: '',
 		tags: '',
+		period: '30',
 	});
 	const [errors, setErrors] = useState({
 		name: '',
@@ -97,6 +98,7 @@ export default function AddAccountPage() {
 			issuer: newAccount.issuer || 'Unknown',
 			secret: newAccount.secret.replace(/\s/g, '').toUpperCase(),
 			tags,
+			period: parseInt(newAccount.period) || 30,
 		};
 
 		try {
@@ -296,6 +298,32 @@ export default function AddAccountPage() {
 							<p className='text-xs sm:text-sm text-gray-500 flex items-start gap-1.5'>
 								<span className='inline-block w-1.5 h-1.5 bg-gray-400 rounded-full mt-1.5'></span>
 								Separate tags with commas to organize your accounts
+							</p>
+						</div>
+
+						{/* Period Field */}
+						<div className='space-y-2'>
+							<Label
+								htmlFor='period'
+								className='text-sm sm:text-base font-medium flex items-center gap-2'
+							>
+								Time Period (seconds)
+								<span className='text-xs text-gray-400'>(optional)</span>
+							</Label>
+							<Input
+								id='period'
+								type='number'
+								placeholder='30'
+								value={newAccount.period}
+								onChange={(e) => handleFieldChange('period', e.target.value)}
+								disabled={isLoading}
+								min='15'
+								max='120'
+								className='rounded-xl transition-all duration-200 focus:ring-2 focus:ring-blue-400 focus:border-transparent h-12 text-base'
+							/>
+							<p className='text-xs sm:text-sm text-gray-500 flex items-start gap-1.5'>
+								<span className='inline-block w-1.5 h-1.5 bg-gray-400 rounded-full mt-1.5'></span>
+								Most services use 30 seconds (default: 30, range: 15-120)
 							</p>
 						</div>
 					</div>

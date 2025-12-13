@@ -110,7 +110,6 @@ export default function AuthenticatorApp() {
 		setUserToken(null);
 		setCurrentUsername(null);
 		setAccounts([]);
-		toast.success('You have been successfully logged out.');
 		router.push('/login');
 	};
 
@@ -120,9 +119,7 @@ export default function AuthenticatorApp() {
 			if (!userToken) throw new Error('No token');
 			await accountService.removeAccount(id, userToken);
 			setAccounts((prev) => prev.filter((acc) => acc._id !== id));
-			toast.success('Account has been removed successfully');
 		} catch (error: any) {
-			toast.error('Failed to remove account from database.');
 			if (
 				error.message === 'Invalid token' ||
 				error.message === 'No token provided'
