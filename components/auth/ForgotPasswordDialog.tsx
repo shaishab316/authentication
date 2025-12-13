@@ -10,7 +10,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { toast } from 'react-toastify';
 
 interface ForgotPasswordDialogProps {
 	open: boolean;
@@ -45,15 +44,10 @@ export const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({
 				throw new Error(data.message || 'Failed to reset password');
 			}
 
-			toast({
-				title: 'Password Reset Initiated',
-				description: data.message,
-			});
 			onOpenChange(false);
 			setUsername('');
 		} catch (error: any) {
 			setError(error.message);
-			toast.error(error.message);
 		} finally {
 			setLoading(false);
 		}
@@ -61,14 +55,6 @@ export const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogTrigger asChild>
-				<Button
-					variant='link'
-					className='mt-4 text-blue-600 hover:text-blue-700'
-				>
-					Forgot Password?
-				</Button>
-			</DialogTrigger>
 			<DialogContent className='rounded-2xl'>
 				<DialogHeader>
 					<DialogTitle>Reset Password</DialogTitle>

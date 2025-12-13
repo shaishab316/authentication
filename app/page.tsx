@@ -7,7 +7,6 @@ import { accountService } from '@/services/accountService';
 import { authService } from '@/services/authService';
 import { totpService } from '@/services/totpService';
 import type { Account, CodeData } from '@/types/account';
-import { AuthScreen } from '@/components/auth/AuthScreen';
 import { Header } from '@/components/authenticator/Header';
 import { SearchBar } from '@/components/authenticator/SearchBar';
 import { AccountList } from '@/components/authenticator/AccountList';
@@ -31,8 +30,11 @@ export default function AuthenticatorApp() {
 			setUserToken(stored.token);
 			setCurrentUsername(stored.username);
 			setIsAuthenticated(true);
+		} else {
+			// Redirect to login if not authenticated
+			router.push('/login');
 		}
-	}, []);
+	}, [router]);
 
 	useEffect(() => {
 		if (isAuthenticated && userToken) {
@@ -89,13 +91,6 @@ export default function AuthenticatorApp() {
 		});
 	}, [accounts, searchQuery]);
 
-	const handleLogin = async (token: string, username: string) => {
-		authService.storeAuth(token, username);
-		setUserToken(token);
-		setCurrentUsername(username);
-		setIsAuthenticated(true);
-	};
-
 	const handleLogout = () => {
 		authService.clearAuth();
 		setIsAuthenticated(false);
@@ -103,6 +98,7 @@ export default function AuthenticatorApp() {
 		setCurrentUsername(null);
 		setAccounts([]);
 		toast.success('You have been successfully logged out.');
+		router.push('/login');
 	};
 
 	const handleRemoveAccount = async (e: React.MouseEvent, id: string) => {
@@ -127,45 +123,75 @@ export default function AuthenticatorApp() {
 		setSearchQuery(`tag:${tag}`);
 	};
 
+	// Show nothing while checking authentication (will redirect if needed)
 	if (!isAuthenticated) {
-		return <AuthScreen onLogin={handleLogin} />;
+		return null;
 	}
 
 	return (
-		<div className='min-h-screen bg-gray-50 p-4'>
-			<div className='max-w-md mx-auto'>
-				<Header
-					currentUsername={currentUsername}
-					userToken={userToken}
-					onLogout={handleLogout}
-					isChangePasswordDialogOpen={isChangePasswordDialogOpen}
-					setIsChangePasswordDialogOpen={setIsChangePasswordDialogOpen}
+		<div className='min-h-screen relative overflow-hidden bg-linear-to-br from-blue-50 via-purple-50 to-pink-50'>
+			{/* Animated Grid Background */}
+			<div className='absolute inset-0 opacity-30'>
+				<div
+					className='absolute inset-0'
+					style={{
+						backgroundImage: `linear-linear(to right, #e5e7eb 1px, transparent 1px),
+					                  linear-linear(to bottom, #e5e7eb 1px, transparent 1px)`,
+						backgroundSize: '40px 40px',
+					}}
 				/>
+				{/* linear Overlay */}
+				<div className='absolute inset-0 bg-linear-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5' />
+			</div>
 
-				<SearchBar
-					searchQuery={searchQuery}
-					setSearchQuery={setSearchQuery}
-					allTags={allTags}
-					onTagClick={searchByTag}
-					resultCount={searchQuery ? filteredAccounts.length : undefined}
-				/>
+			{/* Floating Orbs */}
+			<div className='absolute top-20 left-10 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl animate-pulse' />
+			<div className='absolute bottom-20 right-10 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl animate-pulse delay-1000' />
+			<div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-400/10 rounded-full blur-3xl animate-pulse delay-500' />
 
-				<AccountList
-					accounts={accounts}
-					codes={codes}
-					searchQuery={searchQuery}
-					onRemove={handleRemoveAccount}
-				/>
+			{/* Content */}
+			<div className='relative z-10 p-4 sm:p-6'>
+				<div className='max-w-md mx-auto'>
+					<Header
+						currentUsername={currentUsername}
+						userToken={userToken}
+						onLogout={handleLogout}
+						isChangePasswordDialogOpen={isChangePasswordDialogOpen}
+						setIsChangePasswordDialogOpen={setIsChangePasswordDialogOpen}
+					/>
 
-				<Button
-					onClick={() => router.push('/add-account')}
-					className='w-fit h-12 sm:h-12 text-sm sm:text-base font-medium fixed bottom-4 right-4 sm:bottom-10 sm:right-10 px-3 sm:px-4 py-2 rounded-2xl border-2 border-gray-200 text-black bg-white hover:bg-white hover:border-blue-300 hover:shadow-lg group flex justify-center items-center gap-2 overflow-hidden transition-all duration-300 z-50'
-				>
-					<Plus className='size-5 transition-transform duration-300 group-hover:rotate-90' />
-					<span className='hidden sm:group-hover:inline-block'>
-						Add Account
-					</span>
-				</Button>
+					<SearchBar
+						searchQuery={searchQuery}
+						setSearchQuery={setSearchQuery}
+						allTags={allTags}
+						onTagClick={searchByTag}
+						resultCount={searchQuery ? filteredAccounts.length : undefined}
+					/>
+
+					<AccountList
+						accounts={accounts}
+						codes={codes}
+						searchQuery={searchQuery}
+						onRemove={handleRemoveAccount}
+					/>
+
+					{/* Floating Add Button with Enhanced Effects */}
+					<Button
+						onClick={() => router.push('/add-account')}
+						className='w-fit h-12 sm:h-14 text-sm sm:text-base font-semibold fixed bottom-4 right-4 sm:bottom-10 sm:right-10 px-4 sm:px-5 py-2 rounded-2xl bg-linear-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 shadow-xl hover:shadow-2xl group flex justify-center items-center gap-2 overflow-hidden transition-all duration-300 z-50 hover:scale-110 active:scale-95 border-2 border-white/20'
+					>
+						{/* Shine effect */}
+						<div className='absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000' />
+
+						<Plus className='size-5 sm:size-6 transition-transform duration-300 group-hover:rotate-180 relative z-10' />
+						<span className='hidden sm:group-hover:inline-block relative z-10 font-bold'>
+							Add Account
+						</span>
+
+						{/* Glow effect */}
+						<div className='absolute inset-0 rounded-2xl bg-linear-to-r from-blue-500 to-purple-600 blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-300' />
+					</Button>
+				</div>
 			</div>
 		</div>
 	);
