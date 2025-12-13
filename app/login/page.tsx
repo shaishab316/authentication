@@ -96,7 +96,7 @@ export default function LoginPage() {
 			/>
 
 			{/* Content */}
-			<Card className='w-full md:max-w-md md:rounded-3xl border-0 shadow-2xl bg-white/80 backdrop-blur-xl relative z-10 overflow-hidden group hover:shadow-[0_20px_70px_rgba(139,92,246,0.3)] transition-all duration-500'>
+			<Card className='w-full md:max-w-md rounded-none md:rounded-3xl border-0 shadow-2xl bg-white/80 backdrop-blur-xl relative z-10 overflow-hidden group hover:shadow-[0_20px_70px_rgba(139,92,246,0.3)] transition-all duration-500'>
 				{/* Animated border effect */}
 				<div className='absolute inset-0 rounded-3xl bg-linear-to-r from-blue-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl' />
 				<div className='absolute inset-px rounded-3xl bg-white/90 backdrop-blur-xl' />
