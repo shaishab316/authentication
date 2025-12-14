@@ -35,7 +35,7 @@ export const AccountCard: React.FC<AccountCardProps> = ({
 	const handleCopy = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		if (codeData?.current) {
-			navigator.clipboard.writeText(codeData.current);
+			navigator?.clipboard?.writeText(codeData.current);
 			setIsCopied(true);
 			setTimeout(() => setIsCopied(false), 2000);
 		}

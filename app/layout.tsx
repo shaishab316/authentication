@@ -24,6 +24,11 @@ export default function RootLayout({
 			<body>
 				{children}
 				<ToastProvider />
+				<div className='fixed inset-0 pointer-events-none flex items-center justify-center z-9999'>
+					<div className='text-7xl md:text-9xl font-bold text-gray-300/20 dark:text-gray-700/20 -rotate-45 select-none'>
+						PREVIEW
+					</div>
+				</div>
 			</body>
 		</html>
 	);

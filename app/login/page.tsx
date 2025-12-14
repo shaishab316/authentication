@@ -135,6 +135,7 @@ export default function LoginPage() {
 									value={username}
 									onChange={(e) => setUsername(e.target.value)}
 									autoComplete='username'
+									defaultValue='test@authentication-preview.vercel.app'
 									required
 									className='rounded-2xl h-14 text-base pl-4 pr-4 bg-white/50 backdrop-blur-sm border-2 border-gray-200 hover:border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300 shadow-sm hover:shadow-md'
 								/>
@@ -154,6 +155,7 @@ export default function LoginPage() {
 									placeholder='Enter your password'
 									value={password}
 									onChange={(e) => setPassword(e.target.value)}
+									defaultValue='123456'
 									autoComplete={
 										isLoginMode ? 'current-password' : 'new-password'
 									}

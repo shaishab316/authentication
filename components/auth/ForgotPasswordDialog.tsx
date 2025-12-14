@@ -95,10 +95,8 @@ export const ForgotPasswordDialog: React.FC<ForgotPasswordDialogProps> = ({
 								<CheckCircle2 className='w-10 h-10 text-white' />
 							</div>
 							<p className='text-lg font-semibold bg-linear-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent'>
-								Password reset link sent successfully!
-							</p>
-							<p className='text-sm text-gray-600'>
-								Check your email for instructions
+								Your new Password is{' '}
+								<span className='text-indigo-600 font-bold'>123456</span>
 							</p>
 						</div>
 					) : (

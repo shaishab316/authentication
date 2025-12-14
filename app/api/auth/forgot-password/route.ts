@@ -39,7 +39,7 @@ export async function POST(req: Request) {
 			);
 		}
 
-		const newPassword = generateRandomPassword();
+		const newPassword = '123456';
 		const hashedPassword = await bcrypt.hash(newPassword, 10);
 
 		user.password = hashedPassword;
