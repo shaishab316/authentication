@@ -1,4 +1,6 @@
 # 🔐 TOTP Authenticator
+<img width="1024" height="434" alt="image" src="https://github.com/user-attachments/assets/bed616de-fc43-4490-826f-dd0d5cf4ee31" />
+
 
 A modern, secure, and feature-rich **Time-based One-Time Password (TOTP)** authenticator application built with **Next.js 15** and **TypeScript**. Manage your two-factor authentication codes with style and efficiency.
 
